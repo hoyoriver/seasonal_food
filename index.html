@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>제철 밥상 — 월별 제철재료 & 지역 특산물</title>
+  <style>
+    :root {
+      --primary: #2E7D32;
+      --accent: #FF8F00;
+      --bg: #FAFAF7;
+      --card: #FFFFFF;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%);
+      color: white;
+      text-align: center;
+      padding: 2.5rem 1rem 2rem;
+    }
+    header h1 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.4rem;
+    }
+    header p {
+      font-size: 1rem;
+      opacity: 0.85;
+    }
+
+    /* Tab Nav */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      background: #fff;
+      border-bottom: 2px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex: none;
+      padding: 0.9rem 1.2rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--muted);
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--primary); background: #f0f9f0; }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: #f0f9f0;
+    }
+
+    /* Main Content */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* Section: Monthly */
+    .month-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .month-title {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+    .season-badge {
+      display: inline-block;
+      padding: 0.3rem 1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    /* Month Selector */
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 500px) {
+      .month-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    .month-btn {
+      padding: 0.6rem 0.4rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .month-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+    .month-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+    }
+
+    /* Category Sections */
+    .category-section {
+      margin-bottom: 2rem;
+    }
+    .category-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text);
+    }
+    .category-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Food Cards */
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.75rem;
+    }
+    .food-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 0.75rem;
+      text-align: center;
+      transition: all 0.2s;
+      cursor: default;
+    }
+    .food-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      border-color: #a5d6a7;
+    }
+    .food-emoji {
+      font-size: 2.2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .food-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    .food-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Region Section */
+    .region-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .region-btn {
+      padding: 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .region-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .region-btn.active {
+      border-color: transparent;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .region-emoji { font-size: 1.8rem; display: block; margin-bottom: 0.4rem; }
+    .region-name { font-size: 0.9rem; font-weight: 700; }
+
+    /* Region detail */
+    .region-detail {
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+    }
+    .region-detail-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .region-detail-title { font-size: 1.4rem; font-weight: 800; }
+
+    .specialty-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .specialty-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.9rem;
+      background: var(--bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .specialty-card:hover {
+      background: #f0f9f0;
+      border-color: #a5d6a7;
+      transform: translateX(3px);
+    }
+    .specialty-emoji { font-size: 2rem; flex-shrink: 0; }
+    .specialty-info { flex: 1; min-width: 0; }
+    .specialty-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .specialty-season { font-size: 0.75rem; color: var(--accent); font-weight: 600; margin-bottom: 0.2rem; }
+    .specialty-desc { font-size: 0.75rem; color: var(--muted); }
+
+    /* Tip box */
+    .tip-box {
+      background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 12px 12px 0;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+      color: #2E7D32;
+      font-weight: 600;
+    }
+
+    /* View toggle */
+    .view-toggle {
+      display: flex;
+      gap: 0;
+      background: var(--border);
+      border-radius: 999px;
+      padding: 3px;
+      width: fit-content;
+      margin: 0 auto 1.5rem;
+    }
+    .view-btn {
+      padding: 0.5rem 1.5rem;
+      border: none;
+      border-radius: 999px;
+      background: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .view-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* empty state */
+    .empty {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+    .empty span { display: block; font-size: 3rem; margin-bottom: 1rem; }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌱 제철 밥상</h1>
+  <p>월별 제철재료와 지역 특산물을 한눈에</p>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchView('monthly')">📅 월별 제철</button>
+  <button class="tab-btn" onclick="switchView('regional')">📍 지역 특산물</button>
+</nav>
+
+<main>
+
+  <!-- Monthly Panel -->
+  <div id="panel-monthly" class="panel active">
+    <div id="month-selector" class="month-grid"></div>
+    <div class="month-header">
+      <span class="month-title" id="month-title"></span>
+      <span class="season-badge" id="season-badge"></span>
+      <span id="month-emoji" style="font-size:1.8rem"></span>
+    </div>
+    <div id="tip-box" class="tip-box"></div>
+    <div id="monthly-content"></div>
+  </div>
+
+  <!-- Regional Panel -->
+  <div id="panel-regional" class="panel">
+    <div class="region-grid" id="region-selector"></div>
+    <div id="regional-content" class="empty">
+      <span>📍</span>
+      지역을 선택하면 특산물을 볼 수 있어요
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  🌿 제철재료는 영양도 풍부하고 가격도 저렴해요. 제철 밥상으로 건강한 식생활을!
+</footer>
+
+<script src="data.js"></script>
+<script>
+  const TIPS = {
+    1: "1월은 굴이 가장 맛있는 시기예요. 굴국밥이나 굴전을 추천해요!",
+    2: "2월 냉이로 된장국을 끓이면 봄 향기가 물씬 나요.",
+    3: "봄나물 삼총사 냉이·달래·쑥을 무침으로 만들어 보세요!",
+    4: "4월 주꾸미는 알이 꽉 차서 맛이 최고예요. 주꾸미볶음 추천!",
+    5: "5월 참다랑어는 참치회로 즐기기 좋은 계절이에요.",
+    6: "6월부터 전복이 맛있어져요. 전복죽이나 버터구이로!",
+    7: "복날에는 장어! 7월 장어는 보양식으로 최고예요.",
+    8: "8월 꽃게는 알이 가득해요. 간장게장 담기 좋은 시기!",
+    9: "9월 가을 전어는 굽는 냄새만으로도 집나간 며느리가 돌아온다고 해요.",
+    10: "10월 대하는 소금구이로 먹으면 가장 맛있어요!",
+    11: "11월 굴은 이제부터 겨울 내내 즐길 수 있어요. 굴무침, 굴탕수육도 좋아요.",
+    12: "12월 방어는 기름기가 많아 방어회가 최고예요. 제주 방어 추천!",
+  };
+
+  let currentMonth = new Date().getMonth() + 1;
+  let currentRegion = null;
+  let currentView = 'monthly';
+
+  // Build month selector
+  const monthSel = document.getElementById('month-selector');
+  for (let m = 1; m <= 12; m++) {
+    const btn = document.createElement('button');
+    btn.className = 'month-btn' + (m === currentMonth ? ' active' : '');
+    btn.innerHTML = `<div style="font-size:1.2rem">${SEASONAL_DATA[m].emoji}</div><div>${m}월</div>`;
+    btn.onclick = () => selectMonth(m);
+    monthSel.appendChild(btn);
+  }
+
+  // Build region selector
+  const regionSel = document.getElementById('region-selector');
+  Object.entries(REGIONAL_DATA).forEach(([name, data]) => {
+    const btn = document.createElement('button');
+    btn.className = 'region-btn';
+    btn.id = 'region-btn-' + name;
+    btn.innerHTML = `<span class="region-emoji">${data.emoji}</span><span class="region-name">${name}</span>`;
+    btn.onclick = () => selectRegion(name);
+    regionSel.appendChild(btn);
+  });
+
+  function selectMonth(m) {
+    currentMonth = m;
+    document.querySelectorAll('.month-btn').forEach((b, i) => {
+      b.classList.toggle('active', i + 1 === m);
+    });
+    renderMonthly(m);
+  }
+
+  function renderMonthly(m) {
+    const d = SEASONAL_DATA[m];
+    document.getElementById('month-title').textContent = d.name;
+    const badge = document.getElementById('season-badge');
+    badge.textContent = d.season;
+    badge.style.background = d.color;
+    document.getElementById('month-emoji').textContent = d.emoji;
+    document.getElementById('tip-box').textContent = '💡 ' + TIPS[m];
+
+    const content = document.getElementById('monthly-content');
+    content.innerHTML = '';
+
+    const categories = [
+      { key: 'vegetables', label: '🥬 채소 & 나물', items: d.vegetables },
+      { key: 'seafood', label: '🐟 수산물', items: d.seafood },
+      { key: 'fruits', label: '🍎 과일', items: d.fruits },
+    ];
+
+    categories.forEach(cat => {
+      if (!cat.items || cat.items.length === 0) return;
+      const section = document.createElement('div');
+      section.className = 'category-section';
+      section.innerHTML = `<h3 class="category-title">${cat.label}</h3>`;
+      const grid = document.createElement('div');
+      grid.className = 'food-grid';
+      cat.items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'food-card';
+        card.innerHTML = `
+          <span class="food-emoji">${item.emoji}</span>
+          <div class="food-name">${item.name}</div>
+          <div class="food-desc">${item.desc}</div>
+        `;
+        grid.appendChild(card);
+      });
+      section.appendChild(grid);
+      content.appendChild(section);
+    });
+  }
+
+  function selectRegion(name) {
+    currentRegion = name;
+    document.querySelectorAll('.region-btn').forEach(b => {
+      const isActive = b.id === 'region-btn-' + name;
+      b.classList.toggle('active', isActive);
+      if (isActive) b.style.background = REGIONAL_DATA[name].color;
+      else b.style.background = '';
+    });
+    renderRegional(name);
+  }
+
+  function renderRegional(name) {
+    const d = REGIONAL_DATA[name];
+    const content = document.getElementById('regional-content');
+    content.className = 'region-detail';
+    content.innerHTML = `
+      <div class="region-detail-header">
+        <span style="font-size:2rem">${d.emoji}</span>
+        <span class="region-detail-title">${name} 특산물</span>
+      </div>
+      <div class="specialty-list">
+        ${d.specialties.map(s => `
+          <div class="specialty-card">
+            <span class="specialty-emoji">${s.emoji}</span>
+            <div class="specialty-info">
+              <div class="specialty-name">${s.name}</div>
+              <div class="specialty-season">📅 ${s.season}</div>
+              <div class="specialty-desc">${s.desc}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function switchView(view) {
+    currentView = view;
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', (i === 0 && view === 'monthly') || (i === 1 && view === 'regional'));
+    });
+    document.getElementById('panel-monthly').classList.toggle('active', view === 'monthly');
+    document.getElementById('panel-regional').classList.toggle('active', view === 'regional');
+  }
+
+  // Init
+  renderMonthly(currentMonth);
+</script>
+</body>
+</html>
